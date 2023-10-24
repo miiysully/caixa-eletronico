@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-char novoSaque ='n';
+char novoSaque;
 int saldoAtual, saldoRestante, valorSaque, contador, saqueRecalculado, aux, saldoFinal;
-int Numerocedulas = 6;
+int numeroCedulas = 6;
 
 int quantidadeCedulas[6] = {0};
 int valorCedulas[6] = {100, 50, 20, 10, 5, 2};
@@ -12,58 +12,58 @@ int valorCedulas[6] = {100, 50, 20, 10, 5, 2};
 // Função para saldo:
 int saldo(void){
     printf("Digite o seu saldo: ");
-    scanf("%d", &saldoAtual);
-    getchar();
-    // Impossível sacar um valor negativo.
-    while(saldoAtual < 0){
-        printf("Digite um valor valido para saldo: ");
-        scanf("%d", &saldoAtual);
-        getchar();
-    }
-    // Impossível sacar sem saldo em conta.
-    while(saldoAtual==0){
-        printf("Nao e possivel sacar sem saldo em conta.\n\n");
-        printf("Digite seu novo saldo: ");
-        scanf("%d", &saldoAtual);
-        getchar();
+    if(scanf("%d", &saldoAtual) != 1){
+        printf("\nDigite um valor valido para saldo!\n");
+        while(getchar() != '\n');
+            return saldo();
     }
 
+    // Impossível sacar um valor negativo.
+    while(saldoAtual < 0){
+        printf("\nNao podemos ter saldo negativo. Digite um valor valido para saldo!\n");
+        return saldo();
+    }
+    // Impossível sacar sem saldo em conta.
+    while(saldoAtual == 0){
+        printf("\nNao e possivel sacar sem saldo em conta!\n");
+        return saldo();
+    }
+
+    return 0;
 }
 
 // Função para saque:
 int sacar(void){
     printf("\nQuanto voce quer sacar?: ");
-    scanf("%d", &valorSaque);
-    getchar();
+    if(scanf("%d", &valorSaque) != 1){
+        printf("Digite um valor valido para saque!\n");
+        while(getchar() != '\n');
+            return sacar();
+    }
     aux = valorSaque;
 
     // Impossivel sacar um valor negativo.
     while(valorSaque < 0){
-        printf("Nao e possivel sacar um valor negativo. Ensira um valor valido.\n");
-        printf("\nQuanto voce quer sacar?: ");
-        scanf("%d", &valorSaque);
-        getchar();
+        printf("Nao e possivel sacar um valor negativo. Insira um valor valido!\n");
+        return sacar();
     }
     // Impossivel sacar sem saldo em conta.
-    while(valorSaque==0){
-        printf("Nao e possivel sacar 0 reais. Ensira um valor valido.\n");
-        printf("\nQuanto voce quer sacar?: ");
-        scanf("%d", &valorSaque);
-        getchar();
+    while(valorSaque == 0){
+        printf("Nao e possivel sacar 0 reais. Insira um valor valido!\n");
+        return sacar();
     }
     // Não existe notas de 1 e 3 reais.
     while(valorSaque == 1 || valorSaque == 3){
-        printf("Nao e possivel sacar esse valor. Ensira um valor valido.\n");
-        printf("\nQuanto voce quer sacar?: ");
-        scanf("%d", &valorSaque);
-        getchar();
+        printf("Nota inexistente. No Brasil trabbalhaos com notas de 100, 50, 10, 5 e 2 reais!\n");
+        return sacar();
     }
     // Impossivel sacar um valor que maior que o saldo.
     while(saldoAtual < valorSaque){
-        printf("Saldo insuficiente, saque outro valor: ");
-        scanf("%d", &valorSaque);
-        getchar();
+        printf("Saldo insuficiente, por favor, saque um valor compativel com o seu saldo: ");
+        return sacar();
     }
+
+    return 0;
 }
 
 // Função para a retirada do dinheiro:
@@ -74,7 +74,7 @@ int saldoRetirado(int saldoAtual, int valorSaque){
 
 // Função para calcular as notas:
 int calculadora(int ValorSaque){
-    quantidadeCedulas[0]= valorSaque / 100;
+    quantidadeCedulas[0] = valorSaque / 100;
     valorSaque = valorSaque % 100;
 
     quantidadeCedulas[1] = valorSaque / 50;
@@ -96,11 +96,11 @@ int calculadora(int ValorSaque){
 }
 
 // Função para poder sacar valor impar (143 por exemplo):
-int recalculadora(int saqueRecalculado){
-    if (aux % 2 == 0 && valorSaque ==1){
+void recalculadora(int saqueRecalculado){
+    if (aux % 2 == 0 && valorSaque == 1){
         saqueRecalculado = aux - 6;
     }
-    else if (aux % 2 != 0 && valorSaque==1){
+    else if (aux % 2 != 0 && valorSaque == 1){
         saqueRecalculado = aux - 7;
     }
 
@@ -126,16 +126,21 @@ int recalculadora(int saqueRecalculado){
         quantidadeCedulas[4] = quantidadeCedulas[4] + 1;
         quantidadeCedulas[5] = quantidadeCedulas[5] + 1;
     }
-    else if (aux%2==0 && valorSaque==1){
+    else if (aux % 2 == 0 && valorSaque == 1){
         quantidadeCedulas[5] = quantidadeCedulas[5] + 3;
     }
+
+    return;
 }
 
 // Função para contar as cedulas:
 void cedulas(){
-    for (contador = 0; contador < Numerocedulas; contador++){
+    for (contador = 0; contador < numeroCedulas; contador++){
+        if(quantidadeCedulas[contador] != 0)
         printf("Voce recebeu %d notas de R$%d.\n", quantidadeCedulas[contador], valorCedulas[contador]);
     }
+
+    return;
 }
 
 int main(){
@@ -144,24 +149,42 @@ int main(){
     printf("----------------------------------\n");
 
     saldo();
-    sacar();
 
-    saldoFinal = saldoRetirado(saldoAtual, valorSaque);
-    calculadora(valorSaque);
+    do{
+        sacar();
 
-    if(valorSaque != 1){
-        cedulas();
+        saldoFinal = saldoRetirado(saldoAtual, valorSaque);
+        calculadora(valorSaque);
+
+        if(valorSaque != 1){
+            cedulas();
     }
-    else{
-        recalculadora(saqueRecalculado);
-        cedulas();
+        else{
+            recalculadora(saqueRecalculado);
+            cedulas();
     }
 
-    printf("\nSaldo restante: R$%d.\n", saldoFinal);
+        printf("\nSaldo restante: R$%d.\n", saldoFinal);
 
+        saldoAtual = saldoFinal;
 
+        printf("Voce quer realizar um novo saque? 's' ou 'n':\n");
+        scanf(" %c", &novoSaque);
+        getchar();
 
+        if(novoSaque == 'n'){
+            printf("Obrigado por usar a nossa agencia!\n");
+            break;
+}
 
+        else if(novoSaque != 's'){
+            printf("Opcao invalida, digite 's' ou 'n':\n");
+            scanf(" %c", &novoSaque);
+}
+
+    } while(novoSaque == 's');
+
+    return 0;
 
 }
 
